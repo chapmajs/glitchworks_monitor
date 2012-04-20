@@ -34,11 +34,11 @@ Command Syntax
 
 Command syntax as follows:
 
-D XXXX YYYY	Dump memory from XXXX to YYYY
-E XXXX		Edit memory starting at XXXX (type an X and press enter to exit entry)
-G XXXX		GO starting at address XXXX (JMP in, no RET)
-I XX		Input from I/O port XX and display as hex
-O XX YY		Output to I/O port XX byte YY
+	D XXXX YYYY	Dump memory from XXXX to YYYY
+	E XXXX		Edit memory starting at XXXX (type an X and press enter to exit entry)
+	G XXXX		GO starting at address XXXX (JMP in, no RET)
+	I XX		Input from I/O port XX and display as hex
+	O XX YY		Output to I/O port XX byte YY
 
 The current ultra-basic command processor automatically inserts the spaces after each element.
 So, to dump memory from 0x0000 to 0x000F you'd type
