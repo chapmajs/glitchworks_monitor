@@ -1,0 +1,6 @@
+# Ignore editor files
+*.swp
+
+# Ignore assembler output
+*.prn
+*.com
