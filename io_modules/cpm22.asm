@@ -6,17 +6,17 @@
 ;set the ORG in the main monitor source. Most
 ;CP/M users will want to use 'ORG 0100H'
 
-CONIO	equ	0006H
-CONIN	equ	0001H
+CONIO   equ 0006H
+CONIN   equ 0001H
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;SETUP -- Prepare the system for running the
-;	monitor
+;   monitor
 ;
 ;pre: none
 ;post: stack and console are initialized
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SETUP:	JMP SE1
+SETUP:  JMP SE1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;CIN -- Get a char from the console and echo
@@ -24,15 +24,15 @@ SETUP:	JMP SE1
 ;pre: console device is initialized
 ;post: received char is in A register
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-CIN:	PUSH B
-		PUSH D
+CIN:    PUSH B
+        PUSH D
         PUSH H
         MVI C, CONIN
-		CALL BDOS
+        CALL BDOS
         POP H
         POP D
         POP B
-		RET
+        RET
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;COUT -- Output a character to the console
@@ -40,16 +40,16 @@ CIN:	PUSH B
 ;pre: A register contains char to be printed
 ;post: character is printed to the console
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-COUT:	PUSH B
+COUT:   PUSH B
         PUSH D
         PUSH H
         MVI C, CONIO
-		MOV E, A
-		CALL BDOS
+        MOV E, A
+        CALL BDOS
         POP H
         POP D
         POP B
-		RET
+        RET
 
 ;I/O Module description string
-MOD$:	db 13, 10, 'Built with CP/M 2.2 I/O module', 0
+MOD$:   db 13, 10, 'Built with CP/M 2.2 I/O module', 0

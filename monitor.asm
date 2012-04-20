@@ -10,14 +10,14 @@
 ;This is the base monitor. Consult README for information
 ;on including the I/O module specific to your system.
 
-	ORG XXXXH				;See README for more info
+    ORG XXXXH               ;See README for more info
 
 ;Initialization and sign-on message
-LOG:	JMP SETUP			;See README for more info
-SE1:	LXI H, LOGMSG$
-		CALL STROUT
-		LXI H, MOD$
-		CALL STROUT
+LOG:    JMP SETUP           ;See README for more info
+SE1:    LXI H, LOGMSG$
+        CALL STROUT
+        LXI H, MOD$
+        CALL STROUT
 
 ;Main command loop
 CMDLP:  LXI H, PROMPT$
@@ -304,6 +304,6 @@ STROUT: MOV A, M
         JMP STROUT
 
 LOGMSG$:db 'Glitch Works Monitor for 8080/8085/Z80 and Compatible', 13, 10
-		db 'Version 0.1 Copyright (c) 2012 Jonathan Chapman', 0
+        db 'Version 0.1 Copyright (c) 2012 Jonathan Chapman', 0
 PROMPT$:db 13, 10, 10, '>', 0
-ERR$:	db 13, 10, 'ERROR', 0
+ERR$:   db 13, 10, 'ERROR', 0
