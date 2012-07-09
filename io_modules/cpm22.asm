@@ -8,6 +8,7 @@
 
 CONIO   equ 0006H
 CONIN   equ 0001H
+BDOS    equ 0005H
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;SETUP -- Prepare the system for running the
@@ -52,4 +53,4 @@ COUT:   PUSH B
         RET
 
 ;I/O Module description string
-MOD$:   db 13, 10, 'Built with CP/M 2.2 I/O module', 0
+MSG$:   db 13, 10, 'Built with CP/M 2.2 I/O module', 0

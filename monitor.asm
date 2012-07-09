@@ -16,7 +16,7 @@
 LOG:    JMP SETUP           ;See README for more info
 SE1:    LXI H, LOGMSG$
         CALL STROUT
-        LXI H, MOD$
+        LXI H, MSG$
         CALL STROUT
 
 ;Main command loop
