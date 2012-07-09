@@ -68,7 +68,7 @@ I/O modules need to implement a few named subroutines:
 * CIN: input a char from the console and echo
 * COUT: output a char to the console
 
-Additionally, all I/O modules should define the MOD$ string, which is a null-terminated string describing the particular platform the module is designed for. This will be output at monitor load.
+Additionally, all I/O modules should define the MSG$ string, which is a null-terminated string describing the particular platform the module is designed for. This will be output at monitor load.
 
 SETUP should initialize the Stack Pointer and console device, if the devices are not already initialized. After initialization, it should do an unconditional JUMP to the label SE1.
 
