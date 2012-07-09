@@ -1,8 +1,7 @@
-;Glitch Works Monitor I/O Module for Glitch Works 8085
-;SBC with Multi IO Rev 0 (Zilog 8530 SCC), port A
+;Glitch Works Monitor I/O Module for Zilog 8530 SCC
 ;
-;Adjust CTLPRT and DATPRT for your Multi IO base
-;address. The supplied params are for offset 0x00.
+;Adjust CTLPRT and DATPRT for your specific hardware.
+;Stack Pointer initialized at 0xFFFF, adjust as needed.
 ;
 ;After including this module, you still need to
 ;set the ORG in the main monitor source. If it is to
@@ -61,4 +60,4 @@ COUT1:  IN CTLPRT
 INISCC$:  db 04H, 44H, 03H, 0C1H, 05H, 0EAH, 0BH, 56H, 0CH, 0EH, 0DH, 00H, 0EH, 01H, 0FH, 00H
 
 ;I/O Module description string
-MSG$:     db 13, 10, 'Built with 8085 SBC Multi I/O module', 0
+MSG$:     db 13, 10, 'Built with Zilog 8530 SCC I/O module', 0
