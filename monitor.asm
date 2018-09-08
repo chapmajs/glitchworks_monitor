@@ -1,5 +1,5 @@
-;Glitch Works Monitor for 8080/8085/Z80 and Compatibles 
-;Version 0.1 Copyright (c) 2012 Jonathan Chapman
+;GWMON-80 v0.1.1 for 8080/8085/Z80 and Compatibles 
+;Copyright (c) 2018 The Glitch Works
 ;http://www.glitchwrks.com
 ;
 ;See LICENSE included in the project root for licensing
@@ -10,7 +10,7 @@
 ;This is the base monitor. Consult README for information
 ;on including the I/O module specific to your system.
 
-    ORG XXXXH               ;See README for more info
+        ORG XXXXH               ;See README for more info
 
 ;Initialization and sign-on message
 LOG:    JMP SETUP           ;See README for more info
@@ -22,6 +22,8 @@ SE1:    LXI H, LOGMSG$
 ;Main command loop
 CMDLP:  LXI H, PROMPT$
         CALL STROUT
+        LXI H, CMDLP        ; Get CMDLP address in HL
+        PUSH H              ; Push HL, prime stack for RET to CMDLP
         CALL CIN
         ANI 5Fh
         CPI 'D'
@@ -34,9 +36,10 @@ CMDLP:  LXI H, PROMPT$
         JZ OUTPUT
         CPI 'I'
         JZ INPUT
+        CPI 'L'
+        JZ LOAD
         LXI H, ERR$
-        CALL STROUT
-        JMP CMDLP
+        CALL ERROUT
 
 ;Get a port address, write byte out
 OUTPUT: CALL SPCOUT
@@ -45,7 +48,7 @@ OUTPUT: CALL SPCOUT
         CALL SPCOUT
         CALL GETHEX
         CALL JMPOUT
-        JMP CMDLP
+        RET
 
 ;Input from port, print contents
 INPUT:  CALL SPCOUT
@@ -55,7 +58,7 @@ INPUT:  CALL SPCOUT
         MOV A, B
         CALL JMPIN
         CALL HEXOUT
-        JMP CMDLP
+        RET
 
 ;Edit memory from a starting address until X is
 ;pressed. Display mem loc, contents, and results
@@ -76,7 +79,7 @@ ED1:    MVI A, 13
         CALL DMPLOC
         CALL SPCOUT
         CALL GETHEX
-        JC CMDLP
+        RC
         MOV M, A
         CALL SPCOUT
         CALL DMPLOC
@@ -105,7 +108,7 @@ MD1:    MVI A, 13
         CALL DMP16
         MOV A, D
         CMP H
-        JM CMDLP
+        RM
         MOV A, E
         CMP L
         JM MD2
@@ -113,7 +116,7 @@ MD1:    MVI A, 13
 MD2:    MOV A, D
         CMP H
         JNZ MD1
-        JMP CMDLP
+        RET
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;DMP16 -- Dump 16 consecutive memory locations
@@ -207,6 +210,7 @@ ADRIN:  CALL GETHEX
 ;
 ;pre: none
 ;post: A register contains byte from hex input
+;post: Carry flag set if X was received
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 GETHEX: PUSH D
         CALL CIN
@@ -303,7 +307,82 @@ STROUT: MOV A, M
         INX H
         JMP STROUT
 
-LOGMSG$:db 'Glitch Works Monitor for 8080/8085/Z80 and Compatible', 13, 10
-        db 'Version 0.1 Copyright (c) 2012 Jonathan Chapman', 0
-PROMPT$:db 13, 10, 10, '>', 0
-ERR$:   db 13, 10, 'ERROR', 0
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ERROUT -- Print a null-terminated error string
+;
+;pre: HL contains pointer to start of a null-
+;     terminated string
+;post: string at HL printed to console
+;post: program execution returned to command loop
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ERROUT: CALL CRLF
+        CALL STROUT
+        RET
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CRLF -- Print a CR, LF
+;
+;pre: none
+;post: CR, LF printed to console
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CRLF:   MVI A, 13
+        CALL COUT
+        MVI A, 10
+        CALL COUT
+        RET
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;LOAD -- Load an Intel HEX file from console
+;
+;post: Intel HEX file loaded, or error printed
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+LOAD:   CALL CRLF       ; Newline
+LOAD1:  CALL CINNE
+        CPI ':'
+        JNZ LOAD1       ; Wait for start colon
+        CALL COUT
+        CALL GETHEX     ; Get record length
+        MOV B, A        ; Record length in B
+        MOV C, A        ; Start checksumming in C
+        CALL GETHEX     ; Start address high byte
+        MOV H, A        ; Store in H
+        ADD C
+        MOV C, A        ; Checksum
+        CALL GETHEX     ; Start address low byte
+        MOV L, A        ; Store in L
+        ADD C
+        MOV C, A        ; Checksum
+        CALL GETHEX     ; Get record type
+        MOV D, A        ; Store record type in D
+        ADD C
+        MOV C, A        ; Checksum record type
+        MOV A, B        ; Check record length
+        ANA A
+        JZ LOAD3        ; Length == 0, done getting data
+LOAD2:  CALL GETHEX
+        MOV M, A        ; Store char at HL
+        ADD C
+        MOV C, A        ; Checksum
+        INX H           ; Move memory pointer up
+        DCR B
+        JNZ LOAD2       ; Not done with the line
+LOAD3:  CALL GETHEX     ; Get checksum byte
+        ADD C
+        JNZ CSUMER      ; Checksum bad, print error
+        ORA D
+        JZ LOAD         ; Record Type 00, keep going
+LOAD4:  CALL CINNE      ; Record Type 01, done
+        CPI 10          ; Check for LF
+        JNZ LOAD4
+        RET             ; Got LF, return to command loop
+CSUMER: LXI H, CSERR$
+        CALL ERROUT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Monitor Strings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+LOGMSG$: db 13, 10, 10, 'GWMON-80 0.1.1 for 8080/8085/Z80 and Compatible', 13, 10
+         db 'Copyright (c) 2018 The Glitch Works', 0
+PROMPT$: db 13, 10, 10, '>', 0
+ERR$:    db 'ERROR', 0
+CSERR$:  db 'CHECKSUM ERROR', 0
