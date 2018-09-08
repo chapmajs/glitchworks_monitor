@@ -39,6 +39,7 @@ Command syntax as follows:
 	G XXXX		GO starting at address XXXX (JMP in, no RET)
 	I XX		Input from I/O port XX and display as hex
 	O XX YY		Output to I/O port XX byte YY
+	L           Load an Intel HEX file into memory
 
 The current ultra-basic command processor automatically inserts the spaces after each element.
 So, to dump memory from 0x0000 to 0x000F you'd type
@@ -59,12 +60,15 @@ most likely because it's about the simplest way to implement. Input is autocased
 type entries in either (or even mixed) case. I do want to rewrite the command processor at some point,
 allowing one to type out the command and backspace to correct if necessary. One day!
 
+The Intel HEX loader expects 16-bit addresses. It behaves as an Intel loader should, allowing empty blocks in the middle to be skipped. It will accept either UNIX-style LF endings or DOS/Windows CR/LF endings. After invoking the loader, paste your Intel HEX file into the terminal or do an ASCII upload (depending on your terminal program).
+
 Writing I/O Modules
 -------------------
 
 I/O modules need to implement a few named subroutines:
 
 * SETUP: prepare the stack and console device for use
+* CINNE: input a char from the console, don't echo
 * CIN: input a char from the console and echo
 * COUT: output a char to the console
 
@@ -72,4 +76,4 @@ Additionally, all I/O modules should define the MSG$ string, which is a null-ter
 
 SETUP should initialize the Stack Pointer and console device, if the devices are not already initialized. After initialization, it should do an unconditional JUMP to the label SE1.
 
-CIN and COUT are character I/O routines for your console device. They should not modify any registers other than the A register, so push everything else to the stack and pop it off after your routine. Both of these subroutines should terminate in a RET instruction.
+CINNE, CIN, and COUT are character I/O routines for your console device. They should not modify any registers other than the A register, so push everything else to the stack and pop it off after your routine. Both of these subroutines should terminate in a RET instruction. It's usually good practice to have CIN call CINNE.
