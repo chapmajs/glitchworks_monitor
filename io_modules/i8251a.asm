@@ -70,3 +70,5 @@ INIUART$:  db 00H, 00H, 00H, 40H, 4EH, 37H
 
 ;I/O Module description string
 MSG$:     db 13, 10, 'Built with Intel 8251 I/O module', 0
+
+        END
