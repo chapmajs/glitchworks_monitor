@@ -1,4 +1,4 @@
-;GWMON-80 v0.1.1 for 8080/8085/Z80 and Compatibles 
+;GWMON-80 v0.1.3 for 8080/8085/Z80 and Compatibles 
 ;Copyright (c) 2018 The Glitch Works
 ;http://www.glitchwrks.com
 ;
@@ -67,10 +67,7 @@ EDMEM:  CALL SPCOUT
         CALL ADRIN
         MOV H, D
         MOV L, E
-ED1:    MVI A, 13
-        CALL COUT
-        MVI A, 10
-        CALL COUT
+ED1:    CALL CRLF
         CALL ADROUT
         CALL SPCOUT
         MVI A, ':'
@@ -96,27 +93,24 @@ GO:     CALL SPCOUT
 ;Dump memory between two address locations
 MEMDMP: CALL SPCOUT
         CALL ADRIN
-        MOV H, D
+        MOV H, D            ; Start in HL
         MOV L, E
         MVI C, 10h
         CALL SPCOUT
-        CALL ADRIN
-MD1:    MVI A, 13
-        CALL COUT
-        MVI A, 10
-        CALL COUT
+        CALL ADRIN          ; End in DE
+MD1:    CALL CRLF
         CALL DMP16
-        MOV A, D
-        CMP H
-        RM
-        MOV A, E
-        CMP L
-        JM MD2
-        JMP MD1
-MD2:    MOV A, D
-        CMP H
-        JNZ MD1
-        RET
+        MOV A, D            ; High byte of end address
+        CMP H               ; Compare current high address
+        RM                  ; Done if current high > end high
+        MOV A, E            ; Low byte of end address
+        CMP L               ; Compare current low address
+        JC MD2              ; Current low > end low, check for rollover
+        JMP MD1             ; Continue dumping memory
+MD2:    MOV A, D            ; High byte of end address
+        CMP H               ; Are high bytes the same?
+        JNZ MD1             ; Keep going if upper bytes aren't the same
+        RET                 ; Done if they are
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;DMP16 -- Dump 16 consecutive memory locations
@@ -322,13 +316,15 @@ ERROUT: CALL CRLF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;CRLF -- Print a CR, LF
 ;
+;Preserves HL
+;
 ;pre: none
 ;post: CR, LF printed to console
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-CRLF:   MVI A, 13
-        CALL COUT
-        MVI A, 10
-        CALL COUT
+CRLF:   PUSH H
+        LXI H, CRLF$
+        CALL STROUT
+        POP H
         RET
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -381,8 +377,9 @@ CSUMER: LXI H, CSERR$
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Monitor Strings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-LOGMSG$: db 13, 10, 10, 'GWMON-80 0.1.1 for 8080/8085/Z80 and Compatible', 13, 10
+LOGMSG$: db 13, 10, 10, 'GWMON-80 0.1.3 for 8080/8085/Z80 and Compatible', 13, 10
          db 'Copyright (c) 2018 The Glitch Works', 0
 PROMPT$: db 13, 10, 10, '>', 0
 ERR$:    db 'ERROR', 0
 CSERR$:  db 'CHECKSUM ERROR', 0
+CRLF$:   db 13, 10, 0
