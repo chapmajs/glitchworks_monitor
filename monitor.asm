@@ -39,7 +39,7 @@ CMDLP:  LXI H, PROMPT$
         CPI 'L'
         JZ LOAD
         LXI H, ERR$
-        CALL ERROUT
+        JMP ERROUT
 
 ;Get a port address, write byte out
 OUTPUT: CALL SPCOUT
