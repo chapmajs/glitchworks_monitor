@@ -380,6 +380,6 @@ CSUMER: LXI H, CSERR$
 LOGMSG$: db 13, 10, 10, 'GWMON-80 0.1.3 for 8080/8085/Z80 and Compatible', 13, 10
          db 'Copyright (c) 2018 The Glitch Works', 0
 PROMPT$: db 13, 10, 10, '>', 0
+CSERR$:  db 'CHECKSUM '
 ERR$:    db 'ERROR', 0
-CSERR$:  db 'CHECKSUM ERROR', 0
 CRLF$:   db 13, 10, 0
