@@ -1,5 +1,5 @@
-;GWMON-80 v0.1.3 for 8080/8085/Z80 and Compatibles 
-;Copyright (c) 2018 The Glitch Works
+;GWMON-80 v0.1.4 for 8080/8085/Z80 and Compatibles 
+;Copyright (c) 2019 The Glitch Works
 ;http://www.glitchwrks.com
 ;
 ;See LICENSE included in the project root for licensing
@@ -354,8 +354,8 @@ LOAD1:  CALL CINNE
         MOV C, A        ; Checksum record type
         MOV A, B        ; Check record length
         ANA A
-        JZ LOAD3        ; Length == 0, done getting data
-LOAD2:  CALL GETHEX
+        JZ LOAD4        ; Length == 0, done getting data
+LOAD2:  CALL GETHEX     ; This is the main record processing loop
         MOV M, A        ; Store char at HL
         ADD C
         MOV C, A        ; Checksum
@@ -367,17 +367,17 @@ LOAD3:  CALL GETHEX     ; Get checksum byte
         JNZ CSUMER      ; Checksum bad, print error
         ORA D
         JZ LOAD         ; Record Type 00, keep going
-LOAD4:  CALL CINNE      ; Record Type 01, done
+LOAD4:  CALL CINNE      ; Done getting data, silently eat chars
         CPI 10          ; Check for LF
         JNZ LOAD4
         RET             ; Got LF, return to command loop
-CSUMER: LXI H, CSERR$
-        CALL ERROUT
+CSUMER: LXI H, CSERR$   ; Print checksum error to console
+        JMP ERROUT      ; RET from ERROUT will return to command loop
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Monitor Strings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-LOGMSG$: db 13, 10, 10, 'GWMON-80 0.1.3 for 8080/8085/Z80 and Compatible', 13, 10
+LOGMSG$: db 13, 10, 10, 'GWMON-80 0.1.4 for 8080/8085/Z80 and Compatible', 13, 10
          db 'Copyright (c) 2018 The Glitch Works', 0
 PROMPT$: db 13, 10, 10, '>', 0
 CSERR$:  db 'CHECKSUM '
