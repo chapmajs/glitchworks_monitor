@@ -77,3 +77,11 @@ Additionally, all I/O modules should define the MSG$ string, which is a null-ter
 SETUP should initialize the Stack Pointer and console device, if the devices are not already initialized. After initialization, it should do an unconditional JUMP to the label SE1.
 
 CINNE, CIN, and COUT are character I/O routines for your console device. They should not modify any registers other than the A register, so push everything else to the stack and pop it off after your routine. Both of these subroutines should terminate in a RET instruction. It's usually good practice to have CIN call CINNE.
+
+Tools
+-----
+
+The `tools/` directory contains utilties for working with GWMON-80:
+
+* `gwmon2bin.rb` is a Ruby script for converting GWMON-80 `D` command dumps to binary files
+* `gwmon2bin_sample.txt` is a sample `D` command dump for use with `gwmon2bin.rb`
